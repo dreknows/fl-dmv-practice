@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b5cab"><title>Florida Driver Test Practice</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b5cab"><title>Florida Driver Test Practice</title>
 <style>
 :root{--b:#0b5cab;--bg:#f2f5fa;--ok:#18a058;--bad:#d03050;--card:#fff;--tx:#1b2430}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -34,6 +34,7 @@ main{max-width:640px;margin:0 auto;padding:14px 14px 90px}
 .opt.dim{opacity:.55}
 .grid .opt .tag{text-align:center}
 .exp{border-radius:12px;padding:12px;margin-top:4px;font-size:16px;line-height:1.4}
+.cab{border:3px solid var(--ok);background:#e9f8ef;border-radius:12px;padding:12px;margin:8px 0;font-size:18px;font-weight:700;color:#0f5f2e}.cab img{width:90px;height:90px;object-fit:contain;display:block;margin:6px 0}
 .exp.ok{background:#e9f8ef}.exp.bad{background:#fdecef}
 .foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;justify-content:center;z-index:5}
 .btn{border:0;border-radius:14px;padding:15px 18px;font-size:17px;font-weight:700;background:var(--b);color:#fff;flex:1;max-width:610px}
@@ -82,7 +83,7 @@ function go(){window.rerender=go;$('#ttl').textContent='FL Driver Test Practice'
  <button class="big" onclick="practice('mis')" ${s.mis?'':'disabled style="opacity:.5"'}><span class="ic">❗</span><b>Review My Mistakes</b><small>${s.mis} saved · answer right to remove${st.th?' · ทบทวนข้อที่ผิด':''}</small></button>
  <button class="big" onclick="flash()"><span class="ic">🃏</span><b>Sign Flashcards</b><small>${D.FL.length} signs · tap to flip${st.th?' · การ์ดป้ายจราจร':''}</small></button>
  <button class="big" onclick="tips()"><span class="ic">💡</span><b>Test-day tips & key numbers</b><small>Must-know numbers${st.th?' · ตัวเลขสำคัญ':''}</small></button>
- <p class="muted" style="text-align:center">Based on the official Florida Driver License Handbook (FLHSMV). Practice tool only. <a href="#" onclick="if(confirm('Reset all progress?')){localStorage.removeItem(LS);location.reload()}">Reset</a></p>`;scrollTo(0,0)}
+ <p class="muted" style="text-align:center">Based on the official Florida Driver License Handbook (FLHSMV). Practice tool only. <span style="opacity:.7">v3</span> <a href="#" onclick="if(confirm('Reset all progress?')){localStorage.removeItem(LS);location.reload()}">Reset</a></p>`;scrollTo(0,0)}
 let S=null;
 function prep(q){const o=q.o.map((x,j)=>({t:x[0],th:x[1],ok:j==0}));return{q,o:shuf(o),a:-1}}
 function practice(c){let qs=c=='all'?D.Q:c=='mis'?D.Q.filter(q=>st.m[q.id]):D.Q.filter(q=>q.c==c);
@@ -91,21 +92,23 @@ function exam(){const sg=shuf(D.Q.filter(q=>q.c=='signs')).slice(0,25),ru=shuf(D
  S={mode:'e',list:shuf(sg.concat(ru)).map(prep),i:0,ok:0};showQ()}
 function showQ(){window.rerender=showQ;const it=S.list[S.i],q=it.q,n=S.list.length;
  $('#ttl').textContent=S.mode=='e'?'Exam Simulator':'Practice';
- const done=it.a>=0,fb=done&&S.mode=='p';
+ const done=it.a>=0,fb=done;
  let opts;if(q.k=='img'){opts='<div class="grid">'+it.o.map((o,j)=>`<button class="opt ${cls(it,j,fb)}" onclick="pick(${j})"><span class="l">${'ABCD'[j]}</span><img src="${D.IMG[o.t]}" alt="">${tag(it,j,fb)}</button>`).join('')+'</div>'}
  else opts=it.o.map((o,j)=>`<button class="opt ${cls(it,j,fb)}" onclick="pick(${j})"><span class="l">${'ABCD'[j]}</span><span>${T(o.t,o.th)}${tag(it,j,fb)}</span></button>`).join('');
  const right=done&&it.o[it.a].ok;
  M().innerHTML=`<div class="qn"><span>${S.i+1} / ${n}</span><span>${S.mode=='e'?'Answered '+S.list.filter(x=>x.a>=0).length:'✔ '+S.ok}</span></div><div class="bar"><i style="width:${(S.i+1)/n*100}%"></i></div>
  <div class="card">${pic(q.i)}<div class="q">${T(q.q,q.qt)}</div>${opts}
- ${fb?`<div class="exp ${right?'ok':'bad'}"><b>${right?'✅ Correct!':'❌ Wrong — the correct answer is highlighted in green.'}</b>${!right&&st.th?'<div class="th">ผิด — คำตอบที่ถูกแสดงเป็นสีเขียว</div>':''} ${T(q.e,q.et)}</div>`:''}</div>`;
+ ${fb?(right?'':cab(it))+`<div class="exp ${right?'ok':'bad'}"><b>${right?'✅ Correct!':'❌ Wrong.'}</b>${!right&&st.th?'<div class="th">ผิด</div>':''} ${T(q.e,q.et)}</div>`:''}</div>`;
  const last=S.i==n-1;
  if(S.mode=='p')setF(`<button class="btn g" onclick="go()">Quit</button><button class="btn" ${done?'':'disabled'} onclick="nxt()">${last?'Finish':'Next →'}</button>`);
  else setF(`<button class="btn g" ${S.i?'':'disabled'} onclick="S.i--;showQ()">← Back</button><button class="btn" ${done?'':'disabled'} onclick="${last?'finish()':'nxt()'}">${last?'Finish exam':'Next →'}</button>`)}
+function signName(k){const f=D.FL.find(x=>x[0]==k);return f?[f[1],f[2]]:[k,'']}
+function cab(it){const c=it.o.find(o=>o.ok);if(it.q.k=='img'){const[n,t]=signName(c.t);return`<div class="cab">Correct answer:<img src="${D.IMG[c.t]}" alt="">${T(n,t)}</div>`}return`<div class="cab">Correct answer: ${T(c.t,c.th)}</div>`}
 function tag(it,j,fb){if(!fb||it.a<0)return'';if(it.o[j].ok)return`<span class="tag">✓ ${it.a==j?'Correct!':'Correct answer'}${st.th?(it.a==j?' · ถูกต้อง':' · คำตอบที่ถูก'):''}</span>`;if(j==it.a)return`<span class="tag">✗ Your answer${st.th?' · คำตอบของคุณ':''}</span>`;return''}
 function cls(it,j,fb){if(it.a<0)return'';if(!fb)return j==it.a?'sel':'';if(it.o[j].ok)return'ok';return j==it.a?'bad':'dim'}
-function pick(j){const it=S.list[S.i];if(S.mode=='p'&&it.a>=0)return;it.a=j;const ok=it.o[j].ok,id=it.q.id;st.seen[id]=1;
+function pick(j){const it=S.list[S.i];if(it.a>=0)return;it.a=j;const ok=it.o[j].ok,id=it.q.id;st.seen[id]=1;
  if(S.mode=='p'){if(ok){S.ok++;st.ok[id]=1;delete st.m[id]}else{st.m[id]=1;delete st.ok[id]}save()}showQ();
- if(S.mode=='p')setTimeout(()=>{const e=document.querySelector('.exp');e&&e.scrollIntoView({behavior:'smooth',block:'nearest'})},50)}
+ setTimeout(()=>{const e=document.querySelector('.exp');e&&e.scrollIntoView({behavior:'smooth',block:'nearest'})},50)}
 function nxt(){if(S.i<S.list.length-1){S.i++;showQ();scrollTo(0,0)}else summary()}
 function summary(){window.rerender=summary;setF(`<button class="btn" onclick="go()">Home</button>`);const n=S.list.length;
  M().innerHTML=`<div class="card"><h2>Practice complete</h2><div class="res">${S.ok}/${n}</div><p class="muted" style="text-align:center">${Math.round(S.ok/n*100)}% correct</p></div>`}
